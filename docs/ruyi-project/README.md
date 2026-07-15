@@ -15,6 +15,7 @@
 | 3 | [03-knowledge-base.md](03-knowledge-base.md) | 知识库端到端链路：数据模型→索引→检索→问答 | 2026-07-15 | ✅ |
 | 4 | [04-examples-catalog.md](04-examples-catalog.md) | 29 个示例脚本分类与学习要点 | 2026-07-15 | ✅ |
 | 5 | [05-startup-guide.md](05-startup-guide.md) | 全部启动方式审查：Docker/Make/dev 脚本 | 2026-07-15 | ✅ |
+| 6 | [06-knowledge-api-reference.md](06-knowledge-api-reference.md) | 知识库 API 参考（37+ 端点，7 大类） | 2026-07-15 | ✅ |
 
 ## 🧪 验证报告
 
