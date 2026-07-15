@@ -54,11 +54,16 @@ known_issues:
   - id: BUG-001
     title: ApiToken 模型缺少 dataset_id 属性
     file: api/models/model.py
-    line: 2236
+    line: 2248
     severity: blocking
     impact: 无法通过 Console API 创建知识库 API Key
     discovered: "2026-07-15"
-    status: open
+    status: closed
+    fixed: "2026-07-15"
+    fix: |
+      1. 模型添加 dataset_id mapped_column + 索引
+      2. DB 手动 ALTER TABLE 补列（迁移已定义但未生效）
+      3. 验证: API Key 创建成功，Service API 返回 200
   - id: ENV-001
     title: 本地 Python 3.11 不满足 api 要求的 3.12
     severity: warning
