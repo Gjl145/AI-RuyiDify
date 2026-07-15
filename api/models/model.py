@@ -2233,17 +2233,19 @@ class Site(Base):
         return dify_config.APP_WEB_URL or request.url_root.rstrip("/")
 
 
-class ApiToken(Base):  # bug: this uses setattr so idk the field.
+class ApiToken(Base):
     __tablename__ = "api_tokens"
     __table_args__ = (
         sa.PrimaryKeyConstraint("id", name="api_token_pkey"),
         sa.Index("api_token_app_id_type_idx", "app_id", "type"),
+        sa.Index("api_token_dataset_id_type_idx", "dataset_id", "type"),
         sa.Index("api_token_token_idx", "token", "type"),
         sa.Index("api_token_tenant_idx", "tenant_id", "type"),
     )
 
     id = mapped_column(StringUUID, default=lambda: str(uuid4()))
     app_id = mapped_column(StringUUID, nullable=True)
+    dataset_id = mapped_column(StringUUID, nullable=True)
     tenant_id = mapped_column(StringUUID, nullable=True)
     type: Mapped[ApiTokenType] = mapped_column(EnumText(ApiTokenType, length=16), nullable=False)
     token: Mapped[str] = mapped_column(String(255), nullable=False)
