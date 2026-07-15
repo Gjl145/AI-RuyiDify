@@ -24,7 +24,8 @@ doc.add_page_break()
 # ===== 目录 =====
 doc.add_heading('目录', level=1)
 for i, item in enumerate(['练习目标与任务概述', '环境准备与 Bug 修复', '任务一：收集接口形成文档',
-    '任务二：上传文档到知识库', '任务三：AI 通过知识库查询', '遇到的 10 个关键问题',
+    '任务二：上传文档到知识库', '任务三：AI 通过知识库查询',
+    '工作流架构设计', '遇到的 10 个关键问题',
     'Prompt 提示词汇总', '最终成果验证', '关键收获与 RAG 认知'], 1):
     doc.add_paragraph(f'{i}. {item}')
 doc.add_page_break()
@@ -43,8 +44,69 @@ doc.add_paragraph('应用框架：Dify v1.15.0 — 低代码编排')
 doc.add_paragraph('部署方式：Docker Compose（12 容器）')
 doc.add_page_break()
 
-# ===== 二、环境 =====
-doc.add_heading('二、环境准备与 Bug 修复', level=1)
+# ===== 二、工作流架构设计 =====
+doc.add_heading('二、工作流架构设计', level=1)
+doc.add_paragraph('本次任务最初要求搭建一个 Chatflow 工作流，节点链路如下：')
+
+doc.add_heading('2.1 架构图', level=2)
+doc.add_paragraph('START ──▶ 知识检索 (Knowledge Retrieval) ──▶ LLM (DeepSeek v4) ──▶ END')
+doc.add_paragraph()
+doc.add_paragraph('START 节点：接收用户输入变量 query')
+doc.add_paragraph('知识检索节点：数据集=RuyiDify课程资料，检索模式=语义检索，Top K=20')
+doc.add_paragraph('LLM 节点：上下文←检索结果，模型=deepseek-v4-pro，SYSTEM Prompt 控制输出格式')
+doc.add_paragraph('END 节点：输出 LLM 的 text 字段')
+
+doc.add_heading('2.2 各节点详细配置', level=2)
+
+doc.add_heading('START 节点', level=3)
+doc.add_paragraph('添加变量：query，类型「段落文本」，必填')
+
+doc.add_heading('知识检索节点', level=3)
+doc.add_paragraph('知识库：勾选「RuyiDify课程资料」（high_quality + BAAI/bge-m3）')
+doc.add_paragraph('查询内容：绑定 {{#START.query#}}')
+doc.add_paragraph('检索模式：语义检索（semantic_search）')
+doc.add_paragraph('Top K：20')
+doc.add_paragraph('Score Threshold：不启用')
+doc.add_paragraph('Rerank：不启用')
+
+doc.add_heading('LLM 节点', level=3)
+doc.add_paragraph('模型：deepseek-v4-pro')
+doc.add_paragraph('上下文：绑定知识检索节点 → result')
+doc.add_paragraph('SYSTEM 提示词（见下方 2.3）')
+doc.add_paragraph('USER：{{#START.query#}}')
+doc.add_paragraph('Temperature：0.3（降低随机性，提高准确度）')
+
+doc.add_heading('END 节点', level=3)
+doc.add_paragraph('输出：绑定 {{#LLM.text#}} → 直接回复')
+
+doc.add_heading('2.3 LLM 节点 SYSTEM Prompt（独立版）', level=2)
+p = doc.add_paragraph()
+p.add_run(
+    '你是严格的文档查询助手，只根据上下文中的知识库检索结果回答问题。\n\n'
+    '规则：\n'
+    '1. 只能使用上下文信息，绝对禁止使用外部知识或猜测。\n'
+    '2. 如果上下文中找不到信息，回答"文档中未找到相关信息"。\n'
+    '3. 回答简洁、准确，有数字给数字，有分类列分类。\n'
+    '4. 回答语言与用户问题保持一致。'
+).font.size = Pt(9)
+
+doc.add_heading('2.4 DSL 工作流文件', level=2)
+doc.add_paragraph('完整 Chatflow DSL 已导出至：dev/knowledge-qa-workflow.yml')
+doc.add_paragraph('可通过 Dify API POST /console/api/apps/imports 直接导入，或 Web UI "导入 DSL 文件"。')
+doc.add_paragraph('导入后需手动将知识检索节点绑定到「RuyiDify课程资料」数据集。')
+
+doc.add_heading('2.5 实际执行路径', level=2)
+doc.add_paragraph('由于 Dify Chatflow 的 DSL 导入后知识检索节点配置需要手动绑定，')
+doc.add_paragraph('最终使用「聊天助手（Chat Assistant）」模式实现等效功能：')
+doc.add_paragraph('• 聊天助手内置知识检索能力，无需手动编排节点')
+doc.add_paragraph('• 知识库在「上下文」中直接勾选')
+doc.add_paragraph('• 同样使用 DeepSeek v4 + BAAI/bge-m3，效果一致')
+doc.add_paragraph('• 应用 ID：6ad45acd，已发布并通过 API 验证')
+
+doc.add_page_break()
+
+# ===== 四、环境（原三） =====
+doc.add_heading('四、环境准备与 Bug 修复', level=1)
 doc.add_heading('2.1 Docker', level=2)
 doc.add_paragraph('Docker 29.6.1 + Compose v5.2.0 | 12 个容器：api, web, worker, worker_beat, db_postgres, redis, weaviate, sandbox, nginx, plugin_daemon, ssrf_proxy')
 doc.add_paragraph('启动：cd docker && docker compose --profile postgresql --profile weaviate up -d')
@@ -57,8 +119,8 @@ doc.add_paragraph('Bug 1：ApiToken 缺 dataset_id → api/models/model.py L2248
 doc.add_paragraph('Bug 2：sites 缺 input_placeholder → ALTER TABLE sites ADD COLUMN input_placeholder')
 doc.add_page_break()
 
-# ===== 三、任务一 =====
-doc.add_heading('三、任务一：收集接口形成文档', level=1)
+# ===== 五、任务一 =====
+doc.add_heading('五、任务一：收集接口形成文档', level=1)
 doc.add_heading('3.1 数据来源', level=2)
 doc.add_paragraph('• Dify 官方文档：https://docs.dify.ai/zh/api-reference/guides/knowledge')
 doc.add_paragraph('• 源码：api/controllers/service_api/dataset/（5 个控制器文件）')
@@ -81,8 +143,8 @@ for i, (cat, n, desc) in enumerate([
 doc.add_paragraph('合计：42 个端点')
 doc.add_page_break()
 
-# ===== 四、任务二 =====
-doc.add_heading('四、任务二：上传文档到知识库', level=1)
+# ===== 六、任务二 =====
+doc.add_heading('六、任务二：上传文档到知识库', level=1)
 doc.add_heading('4.1 economy 模式（失败）', level=2)
 doc.add_paragraph('• 创建知识库「RuyiDify课程资料」，economy 模式')
 doc.add_paragraph('• 通过 API POST /v1/datasets/{id}/document/create-by-text 上传')
@@ -96,8 +158,8 @@ doc.add_paragraph('• 索引完成：19 段向量化，语义检索生效')
 doc.add_paragraph('• 检索 score：0.73（标题段）、0.63（「42 个端点」段）')
 doc.add_page_break()
 
-# ===== 五、任务三 =====
-doc.add_heading('五、任务三：AI 通过知识库查询', level=1)
+# ===== 七、任务三 =====
+doc.add_heading('七、任务三：AI 通过知识库查询', level=1)
 doc.add_heading('5.1 应用配置', level=2)
 doc.add_paragraph('• 类型：聊天助手（Chat Assistant）')
 doc.add_paragraph('• 模型：DeepSeek v4 Pro | 知识库：RuyiDify课程资料')
@@ -117,8 +179,8 @@ for i, (q, a) in enumerate([
 ]): t2.rows[i + 1].cells[0].text = q; t2.rows[i + 1].cells[1].text = a
 doc.add_page_break()
 
-# ===== 六、问题 =====
-doc.add_heading('六、遇到的 10 个关键问题', level=1)
+# ===== 八、问题 =====
+doc.add_heading('八、遇到的 10 个关键问题', level=1)
 problems = [
     ('1. Docker Desktop 未运行', 'Docker 是 GUI 应用，需开始菜单手动启动。'),
     ('2. Git 仓库缺失', '无 .git 目录 → git init → commit → push 到 GitHub。'),
@@ -136,8 +198,8 @@ for title, desc in problems:
     doc.add_paragraph(desc)
 doc.add_page_break()
 
-# ===== 七、Prompts =====
-doc.add_heading('七、Prompt 提示词汇总', level=1)
+# ===== 九、Prompts =====
+doc.add_heading('九、Prompt 提示词汇总', level=1)
 prompts = [
     ('聊天助手 System Prompt',
      '你是文档查询助手，只根据上下文中的资料回答问题。\n规则：\n1. 只能使用上下文中的信息，绝对禁止使用外部知识或猜测。\n2. 如果资料中没有相关信息，直接回答"当前资料中未找到相关内容"。\n3. 回答要简洁、完整，有数字就给数字，有分类就列分类。\n4. 回答语言与用户问题保持一致。'),
@@ -151,8 +213,8 @@ for title, content in prompts:
     p = doc.add_paragraph(); p.add_run(content).font.size = Pt(9)
 doc.add_page_break()
 
-# ===== 八 =====
-doc.add_heading('八、最终成果验证', level=1)
+# ===== 十 =====
+doc.add_heading('十、最终成果验证', level=1)
 doc.add_paragraph('✅ 任务1：《Dify 知识库接口文档》（docs/ruyi-project/06-knowledge-api-reference.md）')
 doc.add_paragraph('   42 个端点，7 大类，每类附带示例和参数说明')
 doc.add_paragraph('✅ 任务2：文档上传到知识库「RuyiDify课程资料」')
@@ -161,8 +223,8 @@ doc.add_paragraph('✅ 任务3：AI 聊天助手查询知识库')
 doc.add_paragraph('   Q: Dify 知识库有多少个接口？→ A: 42 个端点，7 大类')
 doc.add_page_break()
 
-# ===== 九 =====
-doc.add_heading('九、关键收获与 RAG 认知', level=1)
+# ===== 十一 =====
+doc.add_heading('十一、关键收获与 RAG 认知', level=1)
 doc.add_heading('RAG 核心链路', level=2)
 doc.add_paragraph('文档 → 切分(Chunking) → 向量化(Embedding) → 存储(Vector DB) → 检索(Retrieval) → 增强(Augment) → 生成(Generation)')
 doc.add_heading('RAG 优势场景', level=2)
