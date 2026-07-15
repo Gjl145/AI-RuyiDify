@@ -14,6 +14,7 @@
 | 2 | [02-configuration.md](02-configuration.md) | 所有配置文件、环境变量、作用说明 | 2026-07-15 | ✅ |
 | 3 | [03-knowledge-base.md](03-knowledge-base.md) | 知识库端到端链路：数据模型→索引→检索→问答 | 2026-07-15 | ✅ |
 | 4 | [04-examples-catalog.md](04-examples-catalog.md) | 29 个示例脚本分类与学习要点 | 2026-07-15 | ✅ |
+| 5 | [05-startup-guide.md](05-startup-guide.md) | 全部启动方式审查：Docker/Make/dev 脚本 | 2026-07-15 | ✅ |
 
 ## 🧪 验证报告
 

@@ -41,6 +41,10 @@ documents:
     title: 示例脚本分类目录
     last_updated: "2026-07-15"
     source_freshness: fresh
+  - file: 05-startup-guide.md
+    title: 全部启动方式审查报告
+    last_updated: "2026-07-15"
+    source_freshness: fresh
   - file: verification/2026-07-15-docker-compose.md
     title: Docker Compose 验证报告
     last_updated: "2026-07-15"
