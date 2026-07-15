@@ -1,0 +1,69 @@
+# RuyiDify 项目文档元数据
+# 供 AI 快速判断文档时效性，决定是否需要重新分析源码。
+# 人类也可快速了解各模块最后验证时间。
+
+project:
+  name: RuyiDify
+  based_on: Dify v1.15.0
+  language: zh-CN
+  repo_path: D:\ai\RuyiDify
+
+last_source_analysis:
+  date: "2026-07-15"
+  by: Hermes Agent (deepseek-v4-pro)
+  scope: full  # full | incremental | targeted
+  notes: 初次全量分析，覆盖架构/配置/知识库链路/示例
+
+last_docker_verification:
+  date: "2026-07-15"
+  by: Hermes Agent
+  status: passed  # passed | partial | failed
+  services_verified: [api, db_postgres, redis, weaviate, sandbox, web, worker, worker_beat, nginx, plugin_daemon, ssrf_proxy]
+  notes: 全服务启动成功，Console API CRUD 验证通过。ApiToken 模型有 bug 阻塞 Service API 示例脚本验证。
+
+documents:
+  - file: README.md
+    title: 总索引
+    last_updated: "2026-07-15"
+  - file: 01-architecture.md
+    title: 项目架构分析
+    last_updated: "2026-07-15"
+    source_freshness: fresh  # fresh | stale | unknown
+  - file: 02-configuration.md
+    title: 配置入口参考
+    last_updated: "2026-07-15"
+    source_freshness: fresh
+  - file: 03-knowledge-base.md
+    title: 知识库端到端链路
+    last_updated: "2026-07-15"
+    source_freshness: fresh
+  - file: 04-examples-catalog.md
+    title: 示例脚本分类目录
+    last_updated: "2026-07-15"
+    source_freshness: fresh
+  - file: verification/2026-07-15-docker-compose.md
+    title: Docker Compose 验证报告
+    last_updated: "2026-07-15"
+    source_freshness: fresh
+
+known_issues:
+  - id: BUG-001
+    title: ApiToken 模型缺少 dataset_id 属性
+    file: api/models/model.py
+    line: 2236
+    severity: blocking
+    impact: 无法通过 Console API 创建知识库 API Key
+    discovered: "2026-07-15"
+    status: open
+  - id: ENV-001
+    title: 本地 Python 3.11 不满足 api 要求的 3.12
+    severity: warning
+    workaround: 使用 Docker 运行
+    discovered: "2026-07-15"
+    status: open
+
+# AI 阅读指引:
+# 1. 先读本文档的 last_source_analysis.date
+# 2. 如果距今超过 30 天或代码有重大变更，建议重新全量分析
+# 3. 如果距今 7-30 天，读取 01-04 文档足够
+# 4. 如果距今 < 7 天，直接读具体文档即可
