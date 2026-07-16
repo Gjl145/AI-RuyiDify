@@ -1,5 +1,4 @@
 """用 Python 脚本查询 Dify 知识库 — 检索 + LLM 回答"""
-import json
 import requests
 
 # 配置
