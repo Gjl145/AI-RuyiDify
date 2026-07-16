@@ -1,9 +1,36 @@
-"""不登录 Dify 界面，直接用 API 查看知识库里的内容"""
-import requests
+"""不登录 Dify 界面，直接用 API 查看知识库里的内容
 
-API_BASE = "http://localhost/v1"
-API_KEY = "ds-OuFGPk1qgB0RtmQM2WrdDCb4"
-DS_ID = "f759c84c-70a4-462e-9781-63c16a9fbbcc"
+配置方式（优先级从高到低）：
+  1. 环境变量 DIFY_API_BASE_URL、DS_API_KEY、DS_ID
+  2. 项目根目录 key.txt（格式：KEY=VALUE，每行一个）
+"""
+
+import os
+import requests
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+KEY_FILE = ROOT / "key.txt"
+
+
+def _load_key(key_name: str, env_name: str, default: str = "") -> str:
+    val = os.getenv(env_name)
+    if val:
+        return val
+    if KEY_FILE.exists():
+        for line in KEY_FILE.read_text(encoding="utf-8").splitlines():
+            if "=" in line and not line.startswith("#"):
+                k, v = line.split("=", 1)
+                if k.strip() == key_name:
+                    return v.strip()
+    if default:
+        return default
+    raise RuntimeError(f"未找到 {key_name}，请设置环境变量 {env_name} 或在 key.txt 中配置")
+
+
+API_BASE = _load_key("DIFY_API_BASE_URL", "DIFY_API_BASE_URL", "http://localhost:12010/v1")
+API_KEY = _load_key("DS_API_KEY", "DS_API_KEY")
+DS_ID = _load_key("DS_ID", "DS_ID")
 HEADERS = {"Authorization": f"Bearer {API_KEY}"}
 
 
@@ -36,13 +63,13 @@ def list_segments(document_id: str, doc_name: str):
         if not data.get("has_more"):
             break
         page += 1
-    print(f"\n{'─'*60}")
+    print(f"\n{'─' * 60}")
     print(f"文档: {doc_name}  共 {len(all_segments)} 个分段")
-    print(f"{'─'*60}")
+    print(f"{'─' * 60}")
     for seg in all_segments:
         pos = seg.get("position", "?")
         word_count = seg.get("word_count", "?")
-        enabled = "✓" if seg.get("enabled") else "✗"
+        enabled = "启用" if seg.get("enabled") else "禁用"
         content = seg.get("content", "").strip()
         print(f"\n 分段 #{pos}  [{word_count}字] 状态:{enabled}")
         print(f" {content[:200]}")

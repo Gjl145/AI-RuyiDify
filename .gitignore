@@ -254,6 +254,7 @@ scripts/stress-test/reports/
 *.local.json
 *.local.md
 *.local.toml
+key.txt
 
 # Code Agent Folder
 .qoder/*
